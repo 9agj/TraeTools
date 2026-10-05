@@ -49,24 +49,33 @@ jobs:
       - name: Build (Release)
         run: dotnet build TraeTools.csproj -c Release --no-restore --nologo
 
-      - name: Verify assembly version came from version.json
+      # csproj 里的 <SelfContained>true</SelfContained> 会让 SDK 把 RID 追加进输出路径
+      # （bin/Release/net9.0-windows/win-x64/），所以这里动态定位产物，不硬编码子目录。
+      - name: Verify version sync & locate artifacts
+        id: artifacts
         shell: pwsh
         run: |
           $json = (Get-Content version.json -Raw | ConvertFrom-Json).version
-          $exe  = "bin/Release/net9.0-windows/TraeTools.dll"
-          if (-not (Test-Path $exe)) { throw "构建产物缺失: $exe" }
-          $asm = [System.Reflection.AssemblyName]::GetAssemblyName((Resolve-Path $exe))
-          Write-Host "version.json = $json"
-          Write-Host "assembly     = $($asm.Version)"
-          if ($json -notlike "$($asm.Version)*") {
-            throw "版本不同步：version.json=$json，程序集=$($asm.Version)"
-          }
+          $dll = Get-ChildItem -Path "bin/Release" -Recurse -Filter "TraeTools.dll" -ErrorAction SilentlyContinue |
+                 Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if (-not $dll) { throw "未找到构建产物 TraeTools.dll（bin/Release 下）" }
+
+          $asm = [System.Reflection.AssemblyName]::GetAssemblyName($dll.FullName).Version
+          Write-Host "产物路径     : $($dll.FullName)"
+          Write-Host "version.json : $json"
+          Write-Host "程序集版本   : $asm"
+
+          $exp = [System.Version]::Parse($json)
+          $ok = ($asm.Major -eq $exp.Major) -and ($asm.Minor -eq $exp.Minor) -and ($asm.Build -eq $exp.Build)
+          if (-not $ok) { throw "版本不同步：version.json=$json，程序集=$asm" }
           Write-Host "版本同步校验通过"
+
+          "dir=$($dll.DirectoryName)" >> $env:GITHUB_OUTPUT
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: trae-tools-build-${{ github.sha }}
-          path: bin/Release/net9.0-windows/
+          path: ${{ steps.artifacts.outputs.dir }}/
           if-no-files-found: error
           retention-days: 14
