@@ -1,73 +1,188 @@
 name: Release
 
+# 两条触发路径：
+#   1) 推 v* tag        -> 直接发布该 tag 对应的版本
+#   2) 手动 workflow_dispatch -> 可选自动递增 version.json、提交、打 tag，再发布
+# 全流程在同一个 job 内串起来，避免"用 GITHUB_TOKEN 推的 commit/tag 不会触发新 workflow"的限制。
 on:
   push:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      bump:
+        description: "版本递增方式（none = 用当前 version.json 直接发布）"
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - none
+        default: patch
+      prerelease:
+        description: "标记为预发布（不占用 latest）"
+        type: boolean
+        default: false
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
 
 jobs:
-  publish:
+  release:
     runs-on: windows-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0          # 拉取完整历史与所有 tag，供生成"上一版本→本版本"更新差异
+          fetch-depth: 0        # 完整历史，供生成"上一版本 -> 本版本"差异
           fetch-tags: true
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup .NET 9
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: "9.0.x"
 
-      # 发布单文件自包含 exe：应用内更新器（UpdaterService）会下载名为 TraeTools.exe 的资产，
-      # 直接覆盖本地 exe 后重启，因此必须产出可独立运行的单文件程序
-      - name: Publish (self-contained single-file win-x64)
-        run: dotnet publish TraeTools.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
-      - name: Zip distribution
-        shell: powershell
+      # ---------- 1) 决定版本号；手动触发时递增并回写 version.json + 提交 + 打 tag ----------
+      - name: Resolve version
+        id: ver
+        shell: bash
+        env:
+          EVENT: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          BUMP: ${{ github.event.inputs.bump }}
         run: |
-          Compress-Archive -Path publish\* -DestinationPath TraeTools-win-x64.zip -Force
-          Get-ChildItem -Path publish, TraeTools-win-x64.zip | Select-Object Name, Length
+          set -euo pipefail
 
-      # 自动生成更新摘要：取「版本号不大于当前版本」的最近一个 v* tag，
-      # 汇总其到本版本之间的全部提交（跳过 merge 提交）。
-      # 注意：仓库保留着重构前的历史 tag（如 v1.5.2.1），必须排除版本号大于当前的，否则会选错上一版本。
-      - name: Generate release notes
+          read_version() {
+            sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' version.json | head -1
+          }
+
+          # 段数自适应：三段式 1.3.3 -> 1.3.4；
+          # 四段式 1.0.2.2 的 patch 递增最末段 -> 1.0.2.3，与语义一致
+          bump_version() {
+            local cur="$1" kind="$2"
+            IFS='.' read -r -a P <<< "$cur"
+            local n=${#P[@]}
+            case "$kind" in
+              major) P[0]=$((P[0] + 1)); for ((i = 1; i < n; i++)); do P[i]=0; done ;;
+              minor) P[1]=$((P[1] + 1)); for ((i = 2; i < n; i++)); do P[i]=0; done ;;
+              patch) P[$((n - 1))]=$((P[$((n - 1))] + 1)) ;;
+              *) echo "未知递增方式: $kind" >&2; exit 1 ;;
+            esac
+            (IFS=.; echo "${P[*]}")
+          }
+
+          if [ "$EVENT" = "push" ]; then
+            # tag 触发：版本号直接取自 tag
+            VER="${REF_NAME#v}"
+            TAG="$REF_NAME"
+            echo "由 tag 触发：$TAG"
+          else
+            CUR="$(read_version)"
+            if [ "${BUMP:-patch}" = "none" ]; then
+              VER="$CUR"
+            else
+              VER="$(bump_version "$CUR" "$BUMP")"
+            fi
+            TAG="v$VER"
+            echo "手动触发：$CUR -> $VER (bump=$BUMP)"
+
+            # 回写 version.json（版本 + 构建日期）
+            DATE="$(date -u +%F)"
+            sed -i "s/\(\"version\"[[:space:]]*:[[:space:]]*\)\"[^\"]*\"/\1\"$VER\"/" version.json
+            sed -i "s/\(\"buildDate\"[[:space:]]*:[[:space:]]*\)\"[^\"]*\"/\1\"$DATE\"/" version.json
+            echo "version.json 更新为：$(tr -d '\n' < version.json)"
+
+            if [ "$VER" != "$CUR" ] || ! git diff --quiet version.json; then
+              git config user.name  "github-actions[bot]"
+              git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+              git add version.json
+              git commit -m "chore(release): v$VER"
+              git push origin "HEAD:${GITHUB_REF_NAME}"
+            fi
+          fi
+
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+            echo "tag $TAG 已存在，跳过创建"
+          else
+            git tag -a "$TAG" -m "TraeTools $TAG"
+            git push origin "$TAG"
+          fi
+
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG"     >> "$GITHUB_OUTPUT"
+
+      # ---------- 2) 构建单文件自包含 exe ----------
+      # 应用内更新器（UpdaterService）会按名下载 TraeTools.exe 覆盖自身，产物名不能改。
+      - name: Publish (self-contained single-file win-x64)
         shell: bash
         run: |
-          set -e
-          CUR="${GITHUB_REF_NAME#v}"
+          set -euo pipefail
+          dotnet publish TraeTools.csproj \
+            -c Release \
+            -r win-x64 \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -o publish
+          ls -la publish/
+
+      - name: Zip distribution
+        shell: pwsh
+        run: |
+          Compress-Archive -Path publish/* -DestinationPath TraeTools-win-x64.zip -Force
+          Get-ChildItem -Path publish, TraeTools-win-x64.zip | Select-Object Name, Length
+
+      # ---------- 3) 生成更新摘要（上一版本 -> 本版本） ----------
+      # 仓库可能存在版本号大于当前的遗留 tag，必须过滤，否则会选错"上一版本"。
+      - name: Generate release notes
+        shell: bash
+        env:
+          TAG: ${{ steps.ver.outputs.tag }}
+        run: |
+          set -euo pipefail
+          CUR="${TAG#v}"
           PREV=""
           for t in $(git tag --list 'v*' --sort=-version:refname); do
+            [ "$t" = "$TAG" ] && continue
             v="${t#v}"
-            [ "$v" = "$CUR" ] && continue
-            # 四段式版本比较（v1.0.2.2 / v1.0.3）
             gt=0
-            IFS=. read -ra A <<< "$v"; IFS=. read -ra B <<< "$CUR"
+            IFS=. read -r -a A <<< "$v"; IFS=. read -r -a B <<< "$CUR"
             for i in 0 1 2 3; do
               x=${A[$i]:-0}; y=${B[$i]:-0}
               if (( x > y )); then gt=1; break; fi
               if (( x < y )); then break; fi
             done
-            [ "$gt" = "1" ] && continue   # 大于当前版本（历史遗留超前 tag）跳过
+            [ "$gt" = "1" ] && continue
             PREV="$t"; break
           done
+
           {
-            echo "TraeTools ${GITHUB_REF_NAME}"
+            echo "TraeTools ${TAG}"
             echo ""
             echo "- 单文件自包含 Windows x64 程序（无需额外安装 .NET 运行时）"
             echo "- 应用内「检查更新」会下载本 Release 的 \`TraeTools.exe\` 自动替换升级"
             echo ""
-            if [ -n "${PREV}" ]; then
-              echo "## 更新差异（${PREV} → ${GITHUB_REF_NAME}）"
+            if [ -n "$PREV" ]; then
+              echo "## 更新差异（${PREV} → ${TAG}）"
               echo ""
+              echo '```'
               git log --oneline --no-merges "${PREV}..HEAD" || true
+              echo '```'
               echo ""
               echo "> 由提交记录自动生成，完整变更请查看 Commits"
             else
@@ -76,12 +191,27 @@ jobs:
           } > release_notes.md
           cat release_notes.md
 
+      # ---------- 4) 发布 ----------
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: "TraeTools ${{ github.ref_name }}"
+          tag_name: ${{ steps.ver.outputs.tag }}
+          name: "TraeTools ${{ steps.ver.outputs.tag }}"
           body_path: release_notes.md
+          prerelease: ${{ github.event.inputs.prerelease == 'true' }}
           files: |
             publish/TraeTools.exe
             TraeTools-win-x64.zip
           generate_release_notes: false
+
+      - name: Summary
+        shell: bash
+        run: |
+          {
+            echo "### 发布完成 :rocket:"
+            echo ""
+            echo "| 项 | 值 |"
+            echo "|---|---|"
+            echo "| 版本 | \`${{ steps.ver.outputs.tag }}\` |"
+            echo "| 产物 | \`TraeTools.exe\`（单文件自包含） / \`TraeTools-win-x64.zip\` |"
+          } >> "$GITHUB_STEP_SUMMARY"

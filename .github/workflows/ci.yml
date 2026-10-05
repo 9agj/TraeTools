@@ -5,13 +5,22 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+# 同一分支的重复推送自动取消旧任务，避免浪费 runner 时间
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
   build:
+    # 目标框架是 net9.0-windows（Avalonia Desktop + WinForms + WebView2），
+    # 必须在 Windows runner 上编译，Linux runner 无法还原这些目标包。
     runs-on: windows-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -21,12 +30,43 @@ jobs:
         with:
           dotnet-version: "9.0.x"
 
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Show version.json
+        shell: bash
+        run: |
+          echo "version.json => $(tr -d '\n' < version.json)"
+
+      - name: Restore
+        run: dotnet restore TraeTools.csproj --nologo
+
       - name: Build (Release)
-        run: dotnet build TraeTools.csproj -c Release --nologo
+        run: dotnet build TraeTools.csproj -c Release --no-restore --nologo
+
+      - name: Verify assembly version came from version.json
+        shell: pwsh
+        run: |
+          $json = (Get-Content version.json -Raw | ConvertFrom-Json).version
+          $exe  = "bin/Release/net9.0-windows/TraeTools.dll"
+          if (-not (Test-Path $exe)) { throw "构建产物缺失: $exe" }
+          $asm = [System.Reflection.AssemblyName]::GetAssemblyName((Resolve-Path $exe))
+          Write-Host "version.json = $json"
+          Write-Host "assembly     = $($asm.Version)"
+          if ($json -notlike "$($asm.Version)*") {
+            throw "版本不同步：version.json=$json，程序集=$($asm.Version)"
+          }
+          Write-Host "版本同步校验通过"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: trae-tools-build
+          name: trae-tools-build-${{ github.sha }}
           path: bin/Release/net9.0-windows/
           if-no-files-found: error
+          retention-days: 14
