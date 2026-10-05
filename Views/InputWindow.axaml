@@ -1,0 +1,29 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="480"
+        x:Class="TraeTools.Views.InputWindow"
+        Title="输入"
+        Width="480" SizeToContent="Height" CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="White"
+        FontFamily="Microsoft YaHei UI,Segoe UI">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto" Background="White">
+        <Border Grid.Row="0" Background="#FFF9FAFB" BorderBrush="#FFE2E8F0" BorderThickness="0,0,0,1" Padding="16,12">
+            <TextBlock x:Name="TitleText" Text="输入" FontSize="14" FontWeight="Bold" Foreground="#FF0F172A" />
+        </Border>
+        <TextBlock Grid.Row="1" x:Name="MessageText" Margin="16,14,16,4" FontSize="12" Foreground="#FF0F172A"
+                   LineHeight="18" TextWrapping="Wrap" Text="请输入：" />
+        <TextBox Grid.Row="2" x:Name="InputBox" Margin="16,8,16,4" Padding="8,6" FontSize="13"
+                 PlaceholderText="" KeyDown="OnInputKeyDown" />
+        <Border Grid.Row="3" Background="#FFF9FAFB" BorderBrush="#FFE2E8F0" BorderThickness="0,1,0,0" Padding="16,10" Margin="0,8,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+                <Button Content="取消" MinWidth="100" Height="34" Padding="12,0"
+                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Click="OnCancelClick" />
+                <Button Content="确定" MinWidth="100" Height="34" Padding="12,0" Classes="btn-primary"
+                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Click="OnOkClick" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

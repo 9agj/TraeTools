@@ -1,0 +1,35 @@
+name: Trae Daily Checkin
+
+on:
+  schedule:
+    # 北京时间每天 08:00（UTC 00:00）
+    - cron: "0 0 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  checkin:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run checkin
+        env:
+          TRAE_SESSION: ${{ secrets.TRAE_SESSION }}
+          TRAE_DEVICE_ID: ${{ secrets.TRAE_DEVICE_ID }}
+          TRAE_SESSION_2: ${{ secrets.TRAE_SESSION_2 }}
+          TRAE_DEVICE_ID_2: ${{ secrets.TRAE_DEVICE_ID_2 }}
+          TRAE_SESSION_3: ${{ secrets.TRAE_SESSION_3 }}
+          TRAE_DEVICE_ID_3: ${{ secrets.TRAE_DEVICE_ID_3 }}
+          TRAE_SESSION_4: ${{ secrets.TRAE_SESSION_4 }}
+          TRAE_DEVICE_ID_4: ${{ secrets.TRAE_DEVICE_ID_4 }}
+          FEISHU_WEBHOOK: ${{ secrets.FEISHU_WEBHOOK }}
+        run: python checkin.py

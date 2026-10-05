@@ -1,0 +1,320 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TraeTools.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="TraeTools.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+
+    <Design.DataContext>
+        <vm:SettingsViewModel />
+    </Design.DataContext>
+
+    <UserControl.Styles>
+        <!-- 账号管理卡片：当前激活账号用高亮粗边框框出（与仪表盘账号概览一致） -->
+        <Style Selector="Border.acct-card.acct-active">
+            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+            <Setter Property="BorderThickness" Value="2" />
+            <Setter Property="Background" Value="#1A3B82F6" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="*,Auto">
+
+        <!-- ===== Scrollable Content ===== -->
+        <ScrollViewer Grid.Row="0" Background="Transparent" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Spacing="20" Margin="0,0,16,0">
+
+                <!-- ===== Header ===== -->
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Grid.Column="0" Spacing="4">
+                        <TextBlock Text="设置" Classes="page-title" />
+                        <TextBlock Text="自动化 · Token · 推送 · 账号管理" Classes="page-subtitle" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Classes="btn-primary" Content="保存设置" Command="{Binding SaveSettingsCommand}" />
+                </Grid>
+
+                <!-- ===== Top Row: Auto Checkin + Token ===== -->
+                <Grid ColumnDefinitions="*,*">
+                    <!-- Auto Checkin Panel -->
+                    <Border Grid.Column="0" Classes="card" Margin="0,0,10,0">
+                        <StackPanel Spacing="14">
+                            <TextBlock Text="自动签到" Classes="card-title" />
+                            <Grid ColumnDefinitions="*,Auto">
+                                <StackPanel Grid.Column="0" Spacing="2">
+                                    <TextBlock Text="每日自动签到" FontSize="13" FontWeight="SemiBold" />
+                                    <TextBlock Text="到达指定时间自动执行" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                </StackPanel>
+                                <ToggleSwitch Grid.Column="1" IsChecked="{Binding AutoCheckinEnabled}" OnContent="" OffContent="" />
+                            </Grid>
+                            <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+                                <StackPanel Grid.Column="0" Spacing="2">
+                                    <TextBlock Text="签到时间" FontSize="13" FontWeight="SemiBold" />
+                                    <TextBlock Text="建议非高峰时段" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                </StackPanel>
+                                <TextBox Grid.Column="1" Text="{Binding AutoCheckinTime}" Width="90" Padding="6,4" HorizontalContentAlignment="Center" />
+                            </Grid>
+                            <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+                                <StackPanel Grid.Column="0" Spacing="2">
+                                    <TextBlock Text="签到间隔（秒）" FontSize="13" FontWeight="SemiBold" />
+                                    <TextBlock Text="多账号签到间隔，防止触发风控" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                </StackPanel>
+                                <TextBox Grid.Column="1" Text="{Binding CheckinIntervalSeconds}" Width="90" Padding="6,4" HorizontalContentAlignment="Center" />
+                            </Grid>
+                            <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+                                <StackPanel Grid.Column="0" Spacing="2">
+                                    <TextBlock Text="开机自启" FontSize="13" FontWeight="SemiBold" />
+                                    <TextBlock Text="系统启动时自动运行" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                </StackPanel>
+                                <ToggleSwitch Grid.Column="1" IsChecked="{Binding AutoStartEnabled}" OnContent="" OffContent="" />
+                            </Grid>
+                            <Grid ColumnDefinitions="*,Auto" Margin="0,4">
+                                <StackPanel Grid.Column="0" Spacing="2">
+                                    <TextBlock Text="最小化到托盘" FontSize="13" FontWeight="SemiBold" />
+                                    <TextBlock Text="关闭窗口时驻留托盘" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                </StackPanel>
+                                <ToggleSwitch Grid.Column="1" IsChecked="{Binding MinimizeToTray}" OnContent="" OffContent="" />
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Token Panel -->
+                    <Border Grid.Column="1" Classes="card" Margin="10,0,0,0">
+                        <StackPanel Spacing="14">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Grid.Column="0" Text="Token 信息" Classes="card-title" />
+                                <Button Grid.Column="1" Classes="btn-ghost" Content="复制" Command="{Binding CopyTokenCommand}" />
+                            </Grid>
+                            <Border Classes="code-box" MinHeight="100">
+                                <TextBlock Text="{Binding TokenString}" Foreground="#22D3EE" FontFamily="Consolas" FontSize="11" TextWrapping="Wrap" />
+                            </Border>
+                            <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,2">
+                                <TextBlock Text="更新时间：" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                <TextBlock Text="{Binding TokenUpdateTime}" FontSize="11" Foreground="{StaticResource TextMainBrush}" FontFamily="Consolas" />
+                            </StackPanel>
+                            <Grid ColumnDefinitions="*,Auto" Margin="0,2">
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                    <TextBlock Text="设备号：" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                    <TextBlock Text="{Binding DeviceIdText}" FontSize="11" Foreground="{StaticResource TextMainBrush}" FontFamily="Consolas"
+                                               TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                                    <Button Classes="btn" Content="一键换全部" Padding="10,4" FontSize="11"
+                                            Command="{Binding RenewAllDeviceIdsCommand}" />
+                                    <Button Classes="btn" Content="更换" Padding="10,4" FontSize="11"
+                                            Command="{Binding RegenerateDeviceIdCommand}" />
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock Text="设备号被风控标记（签到 9074「参与用户太多」）时更换即可解除；云端签到需重新「云端部署」同步" FontSize="10"
+                                       Foreground="{StaticResource TextSubBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- ===== Bottom Row: Feishu Push + Account Management ===== -->
+                <Grid ColumnDefinitions="*,*">
+                    <!-- Feishu Push Panel -->
+                    <Border Grid.Column="0" Classes="card" Margin="0,0,10,0">
+                        <StackPanel Spacing="14">
+                            <TextBlock Text="飞书推送" Classes="card-title" />
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Webhook 地址" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                <TextBox Text="{Binding FeishuWebhook}" Padding="8,6" FontFamily="Consolas" FontSize="11" />
+                            </StackPanel>
+                            <Grid ColumnDefinitions="*,Auto">
+                                <StackPanel Grid.Column="0" Spacing="2">
+                                    <TextBlock Text="推送状态" FontSize="13" FontWeight="SemiBold" />
+                                    <TextBlock Text="启用后每日签到结果会推送到飞书" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                </StackPanel>
+                                <ToggleSwitch Grid.Column="1" IsChecked="{Binding PushEnabled}" OnContent="" OffContent="" />
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,2">
+                                <Button Classes="btn" Content="测试推送" Command="{Binding TestPushCommand}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Account Management Panel -->
+                    <Border Grid.Column="1" Classes="card" Margin="10,0,0,0">
+                        <StackPanel Spacing="14">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Grid.Column="0" Text="账号管理" Classes="card-title" />
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                                    <Button Classes="btn" Content="删除选中" Command="{Binding DeleteAccountCommand}" Padding="12,5" />
+                                    <Button Classes="btn-primary" Content="+ 添加" Command="{Binding AddAccountCommand}" Padding="12,5" />
+                                </StackPanel>
+                            </Grid>
+                            <!-- ListBox：点击账号 → Token 面板联动展示该账号凭证 -->
+                            <ListBox ItemsSource="{Binding Accounts}" SelectedItem="{Binding SelectedAccount}"
+                                     Background="Transparent" BorderThickness="0"
+                                     ScrollViewer.VerticalScrollBarVisibility="Auto" MaxHeight="220">
+                                <!-- 选中态：直接在 ListBoxItem 级高亮（不再依赖易失效的卡片反射绑定），保证任何主题下都可见 -->
+                                <ListBox.Styles>
+                                    <Style Selector="ListBoxItem /template/ ContentPresenter" x:SetterTargetType="ContentPresenter">
+                                        <Setter Property="CornerRadius" Value="10" />
+                                    </Style>
+                                    <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter" x:SetterTargetType="ContentPresenter">
+                                        <Setter Property="Background" Value="#123B82F6" />
+                                    </Style>
+                                    <Style Selector="ListBoxItem:selected /template/ ContentPresenter" x:SetterTargetType="ContentPresenter">
+                                        <Setter Property="Background" Value="#263B82F6" />
+                                        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                        <Setter Property="BorderThickness" Value="1" />
+                                    </Style>
+                                    <Style Selector="ListBoxItem:focus-visible /template/ ContentPresenter" x:SetterTargetType="ContentPresenter">
+                                        <Setter Property="Background" Value="#263B82F6" />
+                                    </Style>
+                                </ListBox.Styles>
+                                <ListBox.ItemTemplate>
+                                    <!-- 圆角卡片式账号行 -->
+                                    <DataTemplate>
+                                        <Border CornerRadius="10" Classes="acct-card"
+                                                Classes.acct-active="{Binding IsCurrent}"
+                                                Background="#FFF8FAFC" BorderBrush="#FFE2E8F0" BorderThickness="1"
+                                                Padding="10,8" Margin="2,4" HorizontalAlignment="Stretch">
+                                            <Grid ColumnDefinitions="32,*,Auto">
+                                                <Grid Grid.Column="0" Width="32" Height="32">
+                                                    <Border CornerRadius="16" Background="{Binding AvatarBrush}" IsVisible="{Binding !HasAvatar}">
+                                                        <TextBlock Text="{Binding Initial}" Foreground="White" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    </Border>
+                                                    <Rectangle RadiusX="16" RadiusY="16" IsVisible="{Binding HasAvatar}">
+                                                        <Rectangle.Fill>
+                                                            <ImageBrush Source="{Binding AvatarImage}" Stretch="UniformToFill" />
+                                                        </Rectangle.Fill>
+                                                    </Rectangle>
+                                                </Grid>
+                                                <StackPanel Grid.Column="1" Spacing="1" Margin="10,0" VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                                        <TextBlock Text="{Binding MobileText}" FontSize="10" Foreground="{StaticResource TextMutedBrush}" FontFamily="Consolas" />
+                                                        <Border Classes="badge-ok" Padding="6,0" CornerRadius="4" VerticalAlignment="Center" IsVisible="{Binding IsStudent}">
+                                                            <TextBlock Text="学生" FontSize="9" />
+                                                        </Border>
+                                                    </StackPanel>
+                                                    <TextBlock Text="{Binding CreatedAt}" FontSize="10" Foreground="{StaticResource TextMutedBrush}" FontFamily="Consolas" />
+                                                </StackPanel>
+                                                <Border Grid.Column="2" CornerRadius="999" Padding="10,3" VerticalAlignment="Center"
+                                                        Background="{Binding StatusBgBrush}" BorderBrush="{Binding StatusFgBrush}" BorderThickness="1">
+                                                    <TextBlock Text="{Binding Status}" FontSize="11" Foreground="{Binding StatusFgBrush}" />
+                                                </Border>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- ===== About Section ===== -->
+                <StackPanel Spacing="12">
+                    <TextBlock Text="关于 TraeTools" Classes="page-title" FontSize="18" />
+
+                    <!-- App info card -->
+                    <Border Classes="card">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="14">
+                                <Border Width="52" Height="52" CornerRadius="14" Background="{StaticResource AccentBrush}">
+                                    <TextBlock Text="T" Foreground="White" FontSize="26" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Spacing="4" VerticalAlignment="Center">
+                                    <TextBlock Text="TraeTools" FontSize="16" FontWeight="Bold" Foreground="{StaticResource TextMainBrush}" />
+                                    <TextBlock Text="{Binding AppVersion}" FontSize="12" Foreground="{StaticResource TextMutedBrush}" />
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <Button Classes="btn" Content="重置协议" Command="{Binding ResetAgreementCommand}" />
+                                <Button Classes="btn" Content="重置软件" Command="{Binding ResetSoftwareCommand}"
+                                        Foreground="#FFEF4444" />
+                                <Button Classes="btn" Content="检查更新" Command="{Binding CheckUpdateCommand}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Link rows -->
+                    <Border Classes="card">
+                        <StackPanel Spacing="4">
+
+                            <!-- 打开原仓库 -->
+                            <Grid ColumnDefinitions="40,*,Auto" Margin="0,6">
+                                <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18" Background="#1A3B82F6" VerticalAlignment="Center">
+                                    <TextBlock Text="📦" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1" Spacing="2" Margin="10,0" VerticalAlignment="Center">
+                                    <TextBlock Text="打开原仓库" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextMainBrush}" />
+                                    <TextBlock Text="{Binding OriginalRepoUrl}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" FontFamily="Consolas" />
+                                </StackPanel>
+                                <Button Grid.Column="2" Classes="btn-ghost" Content="打开 →" Command="{Binding OpenOriginalRepoCommand}"
+                                        Foreground="{StaticResource AccentBrush}" Padding="12,6" />
+                            </Grid>
+
+                            <Border Height="1" Background="{StaticResource BorderBrushKey}" Margin="0,4" />
+
+                            <!-- 打开我的 Fork 仓库 -->
+                            <Grid ColumnDefinitions="40,*,Auto" Margin="0,6">
+                                <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18" Background="#1A10B981" VerticalAlignment="Center">
+                                    <TextBlock Text="🍴" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1" Spacing="2" Margin="10,0" VerticalAlignment="Center">
+                                    <TextBlock Text="打开我的 Fork 仓库" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextMainBrush}" />
+                                    <TextBlock Text="{Binding ForkRepoUrl}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" FontFamily="Consolas" />
+                                </StackPanel>
+                                <Button Grid.Column="2" Classes="btn-ghost" Content="打开 →" Command="{Binding OpenForkRepoCommand}"
+                                        Foreground="{StaticResource AccentBrush}" Padding="12,6" />
+                            </Grid>
+
+                            <Border Height="1" Background="{StaticResource BorderBrushKey}" Margin="0,4" />
+
+                            <!-- 问题反馈 -->
+                            <Grid ColumnDefinitions="40,*,Auto" Margin="0,6">
+                                <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18" Background="#1AF59E0B" VerticalAlignment="Center">
+                                    <TextBlock Text="💬" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1" Spacing="2" Margin="10,0" VerticalAlignment="Center">
+                                    <TextBlock Text="问题反馈" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextMainBrush}" />
+                                    <TextBlock Text="GitHub Issues" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                </StackPanel>
+                                <Button Grid.Column="2" Classes="btn-ghost" Content="打开 →" Command="{Binding OpenIssuesCommand}"
+                                        Foreground="{StaticResource AccentBrush}" Padding="12,6" />
+                            </Grid>
+
+                            <Border Height="1" Background="{StaticResource BorderBrushKey}" Margin="0,4" />
+
+                            <!-- 为源仓库点 star -->
+                            <Grid ColumnDefinitions="40,*,Auto" Margin="0,6">
+                                <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18" Background="#1ABF4B40" VerticalAlignment="Center">
+                                    <TextBlock Text="⭐" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1" Spacing="2" Margin="10,0" VerticalAlignment="Center">
+                                    <TextBlock Text="为源仓库点 star" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextMainBrush}" />
+                                    <TextBlock Text="支持作者 · 已授权可一键点赞" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                </StackPanel>
+                                <Button Grid.Column="2" Classes="btn-ghost" Content="点赞 →" Command="{Binding StarSourceRepoCommand}"
+                                        Foreground="{StaticResource AccentBrush}" Padding="12,6" />
+                            </Grid>
+
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- ===== Bottom Status Bar（全局交互返回，有消息时显示、自动消失） ===== -->
+        <Border Grid.Row="1" Background="#FFFBF5EB" BorderBrush="#FFE7C99B" BorderThickness="1,0,0,0"
+                IsVisible="{Binding ShowStatusBar}">
+            <Grid ColumnDefinitions="Auto,*" Margin="24,10">
+                <Border Grid.Column="0" Width="9" Height="9" CornerRadius="5" Background="#FFF59E0B" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="{Binding PushStatus}" FontSize="12" Foreground="#FF92400E"
+                           VerticalAlignment="Center" Margin="10,0,0,0" TextTrimming="CharacterEllipsis" />
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
+
+
+
+
+
+
+

@@ -1,0 +1,193 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TraeTools.ViewModels"
+             xmlns:models="using:TraeTools.Models"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="TraeTools.Views.UsageView"
+             x:DataType="vm:UsageViewModel">
+
+    <Design.DataContext>
+        <vm:UsageViewModel />
+    </Design.DataContext>
+
+    <UserControl.Styles>
+        <!-- 会话/模型行卡片：长方形圆角（而非胶囊 badge） -->
+        <Style Selector="Border.usage-card">
+            <Setter Property="Background" Value="{StaticResource CardBgBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource BorderBrushKey}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="10,6" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="0,0,14,0">
+
+            <!-- ===== Header ===== -->
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Text="用量统计" Classes="page-title" />
+                    <TextBlock Text="{Binding CurrentAccount}" Classes="page-subtitle" />
+                    <TextBlock Text="{Binding DataRangeText}" Classes="page-subtitle" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding StatusMessage}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" />
+                    <Button Classes="btn-primary" Content="拉取用量" Command="{Binding RefreshCommand}"
+                            IsEnabled="{Binding !IsLoading}" />
+                </StackPanel>
+            </Grid>
+
+            <!-- ===== 汇总卡片 ===== -->
+            <Grid Grid.Row="1" ColumnDefinitions="*,*,*,*" Margin="0,14,0,0">
+                <Border Grid.Column="0" Classes="card" Margin="0,0,10,0">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="记录会话" Classes="card-title" />
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="{Binding TotalSessions}" Classes="card-value" />
+                            <TextBlock Text="次" FontSize="13" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Bottom" Margin="0,0,0,4" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="1" Classes="card" Margin="10,0">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="积分消耗" Classes="card-title" />
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="{Binding TotalCreditsText}" Classes="card-value" Foreground="{StaticResource WarningBrush}" />
+                            <TextBlock Text="分" FontSize="13" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Bottom" Margin="0,0,0,4" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="2" Classes="card" Margin="10,0">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="Token（入/出）" Classes="card-title" />
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="{Binding TotalTokensText}" Classes="card-value" FontSize="22" Foreground="{StaticResource AccentBrush}" />
+                            <TextBlock Text="tokens" FontSize="11" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Bottom" Margin="0,0,0,4" />
+                        </StackPanel>
+                        <TextBlock Text="{Binding TotalTokensDetail}" FontSize="11" Foreground="{StaticResource TextSubBrush}"
+                                   TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                </Border>
+                <Border Grid.Column="3" Classes="card" Margin="10,0,0,0">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="缓存命中" Classes="card-title" />
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="{Binding CacheHitText}" Classes="card-value" Foreground="{StaticResource SuccessBrush}" />
+                            <TextBlock Text="{Binding CacheHitRate, StringFormat={}{0:0}%}" Classes="card-value" FontSize="13" Foreground="{StaticResource SuccessBrush}" VerticalAlignment="Bottom" Margin="0,0,0,4" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- ===== 积分快过期提醒 ===== -->
+            <Border Grid.Row="2" Classes="card" IsVisible="{Binding HasExpiring}" Margin="0,14,0,0">
+                <StackPanel Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0" Text="积分快过期提醒" Classes="card-title" />
+                        <TextBlock Grid.Column="1" Text="{Binding ExpiringTotalText}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource DangerBrush}" />
+                    </Grid>
+                    <ItemsControl ItemsSource="{Binding ExpiringItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="models:ExpiringEntItem">
+                                <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,2">
+                                    <Border Grid.Column="0" Classes="badge-warn">
+                                        <TextBlock Text="{Binding CreditsText}" FontSize="11" Foreground="{StaticResource WarningBrush}" />
+                                    </Border>
+                                    <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="12" Foreground="{StaticResource TextMutedBrush}"
+                                               VerticalAlignment="Center" Margin="10,0" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Grid.Column="2" Text="{Binding CountdownText}" FontSize="12" Foreground="{StaticResource DangerBrush}"
+                                               VerticalAlignment="Center" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <!-- ===== 会话列表 + 模型分布（占满剩余高度，内部各自滚动） ===== -->
+            <Grid Grid.Row="3" ColumnDefinitions="1.6*,1*" Margin="0,14,0,0">
+                <!-- 会话列表 -->
+                <Border Grid.Column="0" Classes="card" Margin="0,0,10,0">
+                    <Grid RowDefinitions="Auto,*">
+                        <Grid Grid.Row="0" ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0" Text="逐会话用量" Classes="card-title" />
+                            <TextBlock Grid.Column="1" Text="最多展示 500 条，汇总按全部" FontSize="11" Foreground="{StaticResource TextSubBrush}" />
+                        </Grid>
+                        <ListBox Grid.Row="1" ItemsSource="{Binding Sessions}" Background="Transparent"
+                                 Focusable="False" Margin="0,6,0,0"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListBox.Styles>
+                                <Style Selector="ListBoxItem">
+                                    <Setter Property="Padding" Value="0" />
+                                    <Setter Property="Margin" Value="0,2" />
+                                    <Setter Property="CornerRadius" Value="8" />
+                                    <Setter Property="Background" Value="Transparent" />
+                                </Style>
+                                <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+                                    <Setter Property="Background" Value="#0F3B82F6" />
+                                </Style>
+                                <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+                                    <Setter Property="Background" Value="Transparent" />
+                                </Style>
+                            </ListBox.Styles>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate x:DataType="models:UsageSessionRecord">
+                                    <Border Classes="usage-card">
+                                        <StackPanel Spacing="2">
+                                            <Grid ColumnDefinitions="80,*,Auto">
+                                                <TextBlock Grid.Column="0" Text="{Binding TimeText}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" />
+                                                <TextBlock Grid.Column="1" Text="{Binding ModelText}" FontSize="13" FontWeight="SemiBold"
+                                                           VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Grid.Column="2" Text="{Binding CreditsFloat, StringFormat={}{0:#.#}分}" FontSize="13"
+                                                           FontWeight="Bold" Foreground="{StaticResource WarningBrush}" VerticalAlignment="Center" />
+                                            </Grid>
+                                            <Grid ColumnDefinitions="Auto,*">
+                                                <TextBlock Grid.Column="0"
+                                                           FontSize="11" Foreground="{StaticResource TextSubBrush}"
+                                                           Text="{Binding TokenBrief}" />
+                                            </Grid>
+                                            <TextBlock Text="{Binding UserInputPreview}" FontSize="11" Foreground="{StaticResource TextSubBrush}"
+                                                       TextTrimming="CharacterEllipsis" MaxWidth="460">
+                                                <ToolTip.Tip>
+                                                    <TextBlock Text="{Binding UserInputPreview}" FontSize="12" MaxWidth="420" TextWrapping="Wrap" />
+                                                </ToolTip.Tip>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </Border>
+
+                <!-- 模型分布 -->
+                <Border Grid.Column="1" Classes="card" Margin="10,0,0,0">
+                    <Grid RowDefinitions="Auto,*">
+                        <TextBlock Grid.Row="0" Text="模型分布" Classes="card-title" />
+                        <ScrollViewer Grid.Row="1" Margin="0,6,0,0" HorizontalScrollBarVisibility="Disabled">
+                            <ItemsControl ItemsSource="{Binding ModelStats}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="models:ModelUsageStat">
+                                            <Border Classes="usage-card" Margin="0,0,0,6">
+                                                <StackPanel Spacing="3">
+                                                    <Grid ColumnDefinitions="*,Auto">
+                                                        <TextBlock Grid.Column="0" Text="{Binding ModelName}" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Grid.Column="1" Text="{Binding SessionCount, StringFormat={}{0} 次}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                                    </Grid>
+                                                    <TextBlock FontSize="11" Foreground="{StaticResource TextSubBrush}"
+                                                               Text="{Binding TokenBrief}" />
+                                                    <TextBlock FontSize="11" Foreground="{StaticResource TextSubBrush}"
+                                                               Text="{Binding DetailText}" />
+                                                </StackPanel>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+</UserControl>

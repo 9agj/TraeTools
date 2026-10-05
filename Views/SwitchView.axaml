@@ -1,0 +1,199 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TraeTools.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="TraeTools.Views.SwitchView"
+             x:DataType="vm:SwitchViewModel">
+
+    <UserControl.Styles>
+        <!-- 去掉 ListBoxItem 选中时的外层蓝色框，改为框内高亮 -->
+        <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="Border.acct-selected">
+            <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+            <Setter Property="Background" Value="#1A3B82F6" />
+            <Setter Property="BorderThickness" Value="1.5" />
+        </Style>
+    </UserControl.Styles>
+
+    <Design.DataContext>
+        <vm:SwitchViewModel />
+    </Design.DataContext>
+
+    <ScrollViewer Background="Transparent" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Spacing="20">
+
+            <!-- ===== Header ===== -->
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Text="账号切换" Classes="page-title" />
+                    <TextBlock Text="守护式切换 · 零中断 · 多账号隔离" Classes="page-subtitle" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+                    <Button Classes="btn" Content="刷新" Command="{Binding RefreshListCommand}" />
+                    <Button Classes="btn-primary" Content="建档" Command="{Binding CreateProfileCommand}" />
+                </StackPanel>
+            </Grid>
+
+            <!-- ===== Info Bar ===== -->
+            <Border Classes="panel">
+                <Grid ColumnDefinitions="*,*,*,*" RowDefinitions="Auto,Auto">
+                    <StackPanel Grid.Row="0" Grid.Column="0" Spacing="2">
+                        <TextBlock Text="用户目录" FontSize="11" Foreground="{StaticResource TextSubBrush}" />
+                        <TextBlock Text="{Binding UserDirectory}" FontSize="12" Foreground="{StaticResource TextMainBrush}" FontFamily="Consolas" TextTrimming="CharacterEllipsis" MaxWidth="180" ToolTip.Tip="{Binding UserDirectory}" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="0" Grid.Column="1" Spacing="2">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <TextBlock Grid.Column="0" Text="客户端路径" FontSize="11" Foreground="{StaticResource TextSubBrush}" />
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+                                <Button Classes="btn" Content="选择文件" FontSize="11" Padding="8,3" Command="{Binding BrowseClientExeCommand}" />
+                                <Button Classes="btn" Content="重新探测" FontSize="11" Padding="8,3" Command="{Binding ReDetectClientExeCommand}" />
+                            </StackPanel>
+                        </Grid>
+                        <TextBlock Text="{Binding ClientExePath}" FontSize="12" Foreground="{StaticResource TextMainBrush}" FontFamily="Consolas" TextTrimming="CharacterEllipsis" MaxWidth="300" ToolTip.Tip="{Binding ClientExePath}" />
+                        <TextBlock Text="自动探测失败或想指定其他版本时，可手动选择客户端程序或重新探测" FontSize="10" Foreground="{StaticResource TextMutedBrush}" TextWrapping="Wrap" MaxWidth="300" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="0" Grid.Column="2" Spacing="2">
+                        <TextBlock Text="载体指纹数" FontSize="11" Foreground="{StaticResource TextSubBrush}" />
+                        <TextBlock Text="{Binding CarrierCount}" FontSize="12" Foreground="{StaticResource TextMainBrush}" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="0" Grid.Column="3" Spacing="2">
+                        <TextBlock Text="vault 路径" FontSize="11" Foreground="{StaticResource TextSubBrush}" />
+                        <TextBlock Text="{Binding VaultPath}" FontSize="12" Foreground="{StaticResource TextMainBrush}" FontFamily="Consolas" TextTrimming="CharacterEllipsis" MaxWidth="180" ToolTip.Tip="{Binding VaultPath}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- ===== Account List + Guardian Panel ===== -->
+            <Grid ColumnDefinitions="1.2*,1*">
+                <!-- Account List -->
+                <Border Grid.Column="0" Classes="card" Margin="0,0,10,0">
+                    <Grid RowDefinitions="Auto,*,Auto" MinHeight="340">
+                        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,10">
+                            <TextBlock Grid.Column="0" Text="账号列表" Classes="card-title" />
+                            <TextBlock Grid.Column="1" Text="{Binding AccountCountText}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                        </Grid>
+
+                        <!-- ListBox：支持点击选中（SelectedItem 双向绑定） -->
+                        <ListBox Grid.Row="1" ItemsSource="{Binding Accounts}"
+                                 SelectedItem="{Binding SelectedAccount}"
+                                 Background="Transparent" BorderThickness="0"
+                                 ScrollViewer.VerticalScrollBarVisibility="Auto">
+                            <ListBox.ItemContainerTheme>
+                                <!-- 自定义容器：卡片外观归容器管，选中/悬停时卡片内部高亮而非外部出蓝框 -->
+                                <ControlTheme TargetType="ListBoxItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                    <Setter Property="Padding" Value="0" />
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="BorderBrush" Value="Transparent" />
+                                    <Setter Property="Template">
+                                        <ControlTemplate>
+                                            <Border x:Name="Card" CornerRadius="10" Margin="0,0,0,8" Padding="12"
+                                                    Background="#FFF8FAFC" BorderBrush="#FFE2E8F0" BorderThickness="1">
+                                                <ContentPresenter Content="{TemplateBinding Content}"
+                                                                  ContentTemplate="{TemplateBinding ContentTemplate}" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter>
+                                </ControlTheme>
+                            </ListBox.ItemContainerTheme>
+                            <ListBox.Styles>
+                                <!-- 选中：整卡内部变色（浅蓝底 + 蓝边框）；悬停：仅边框提示 -->
+                                <Style Selector="ListBoxItem:pointerover /template/ Border#Card">
+                                    <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                </Style>
+                                <Style Selector="ListBoxItem:selected /template/ Border#Card">
+                                    <Setter Property="Background" Value="#1A3B82F6" />
+                                    <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+                                    <Setter Property="BorderThickness" Value="1.5" />
+                                </Style>
+                            </ListBox.Styles>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <!-- 内部仅内容（背景/边框由 ListBoxItem 容器的选中态控制） -->
+                                    <Grid ColumnDefinitions="40,*,Auto">
+                                            <Border Grid.Column="0" Width="40" Height="40" CornerRadius="20" Background="{Binding AvatarBrush}">
+                                                <TextBlock Text="{Binding Initial}" Foreground="White" FontSize="14" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                            <StackPanel Grid.Column="1" Spacing="3" Margin="12,0" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold" />
+                                                <!-- 脱敏手机号（#14）：掉登录时一眼认出是哪个账号；无数据时隐藏 -->
+                                                <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}" Text="{Binding MobileText}" IsVisible="{Binding ShowMobile}" />
+                                                <StackPanel Orientation="Horizontal" Spacing="4" ClipToBounds="True">
+                                                    <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}" Text="建档 " />
+                                                    <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}" Text="{Binding CreatedAt}" />
+                                                    <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}" Text=" · " />
+                                                    <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}" Text="{Binding Carriers}" />
+                                                    <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}" Text=" 载体 · " />
+                                                    <TextBlock FontSize="11" Foreground="{StaticResource TextMutedBrush}" Text="{Binding Similarity}" />
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <Border Grid.Column="2" CornerRadius="999" Padding="10,3" VerticalAlignment="Center"
+                                                    Background="{Binding StatusBgBrush}" BorderBrush="{Binding StatusFgBrush}" BorderThickness="1">
+                                                <TextBlock Text="{Binding Status}" FontSize="11" Foreground="{Binding StatusFgBrush}" />
+                                            </Border>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <!-- Action buttons：Grid 三等分等宽、文字水平垂直居中 -->
+                        <Grid Grid.Row="2" ColumnDefinitions="*,*,*" Margin="0,12,0,0">
+                            <Button Grid.Column="0" Classes="btn-primary" Content="切换至此" Height="38" HorizontalAlignment="Stretch" Margin="0,0,4,0"
+                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding SwitchAccountCommand}" />
+                            <Button Grid.Column="1" Classes="btn" Content="校验" Height="38" HorizontalAlignment="Stretch" Margin="4,0"
+                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding VerifyAccountCommand}" />
+                            <Button Grid.Column="2" Classes="btn" Content="删除" Height="38" HorizontalAlignment="Stretch" Margin="4,0,0,0"
+                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Command="{Binding DeleteAccountCommand}" />
+                        </Grid>
+                    </Grid>
+                </Border>
+
+                <!-- Guardian Panel -->
+                <Border Grid.Column="1" Classes="card" Margin="10,0,0,0">
+                    <StackPanel Spacing="14">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Grid.Column="0" Text="切换守护" Classes="card-title" />
+                            <Border Grid.Column="1" Classes="badge-info" Padding="10,3">
+                                <TextBlock Text="5 步流程" FontSize="11" Foreground="{StaticResource AccentBrush}" />
+                            </Border>
+                        </Grid>
+                        <ItemsControl ItemsSource="{Binding Steps}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid ColumnDefinitions="28,*" Margin="0,4">
+                                        <Border Grid.Column="0" Width="28" Height="28" CornerRadius="14" Background="{Binding StatusFgBrush}" Opacity="0.18">
+                                            <TextBlock Text="{Binding Index}" Foreground="{Binding StatusFgBrush}" FontSize="13" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                        <StackPanel Grid.Column="1" Spacing="2" Margin="10,0" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding Title}" FontSize="12" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding Description}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <!-- Dark log area -->
+                        <Border Classes="code-box" MinHeight="140">
+                            <ScrollViewer>
+                                <TextBlock Text="{Binding LogText}" Foreground="#22D3EE" FontSize="11" FontFamily="Consolas" TextWrapping="Wrap" />
+                            </ScrollViewer>
+                        </Border>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
+
+
+
+
+
+
+
+

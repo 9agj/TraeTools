@@ -1,0 +1,38 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="520"
+        x:Class="TraeTools.Views.PatInputWindow"
+        Title="粘贴 GitHub Token（PAT）"
+        Width="520" Height="330" CanResize="False"
+        WindowStartupLocation="CenterOwner"
+        Background="White"
+        FontFamily="Microsoft YaHei UI,Segoe UI">
+    <Grid RowDefinitions="Auto,*,Auto" Background="White">
+        <Border Grid.Row="0" Background="#FFF9FAFB" BorderBrush="#FFE2E8F0" BorderThickness="0,0,0,1" Padding="16,12">
+            <TextBlock Text="粘贴 GitHub Token（PAT）完成授权" FontSize="14" FontWeight="Bold" Foreground="#FF0F172A" />
+        </Border>
+        <ScrollViewer Grid.Row="1" Background="White">
+            <StackPanel Margin="16,12" Spacing="12">
+                <TextBlock FontSize="12" Foreground="#FF0F172A" LineHeight="20" TextWrapping="Wrap" Text="自动打开 GitHub 创建页可简化操作：
+1）点下方「打开 GitHub 创建页」进入 Fine-grained Token 页面；Repository access 勾选 TraeTools。
+2）Permissions：Actions / Contents / Pull requests / Secrets / Workflows 均选 Read and write。
+3）生成后把 github_pat_ 开头的 Token 粘贴到下方输入框，点「确定」。" />
+                <Button Content="打开 GitHub 创建页" Classes="btn" HorizontalAlignment="Left" MinWidth="160" Height="34"
+                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Click="OnOpenGithubClick" />
+                <TextBox x:Name="PatBox" Height="60" AcceptsReturn="True" Padding="8" FontFamily="Consolas" FontSize="11"
+                         PlaceholderText="粘贴 github_pat_ 开头的 Token…" ScrollViewer.VerticalScrollBarVisibility="Auto" />
+            </StackPanel>
+        </ScrollViewer>
+        <Border Grid.Row="2" Background="#FFF9FAFB" BorderBrush="#FFE2E8F0" BorderThickness="0,1,0,0" Padding="16,10">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+                <Button Content="取消" MinWidth="100" Height="34" Padding="12,0"
+                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Click="OnCancelClick" />
+                <Button Content="确定" MinWidth="100" Height="34" Padding="12,0" Classes="btn-primary"
+                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Click="OnOkClick" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
+

@@ -1,0 +1,191 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Styles.Resources>
+        <!-- ========== Color Resources (ARGB) ========== -->
+        <Color x:Key="SidebarBg">#FF1E293B</Color>
+        <Color x:Key="Accent">#FF3B82F6</Color>
+        <Color x:Key="AccentSoft">#1A3B82F6</Color>
+        <Color x:Key="ContentBg">#FFF1F5F9</Color>
+        <Color x:Key="CardBg">#FFFFFFFF</Color>
+        <Color x:Key="TextMain">#FF0F172A</Color>
+        <Color x:Key="TextMuted">#FF64748B</Color>
+        <Color x:Key="TextSub">#FF94A3B8</Color>
+        <Color x:Key="BorderColor">#FFE2E8F0</Color>
+        <Color x:Key="Success">#FF10B981</Color>
+        <Color x:Key="Warning">#FFF59E0B</Color>
+        <Color x:Key="Danger">#FFEF4444</Color>
+        <Color x:Key="HeroDark">#FF1E293B</Color>
+        <Color x:Key="HeroDark2">#FF334155</Color>
+
+        <!-- ========== Brush Resources ========== -->
+        <SolidColorBrush x:Key="SidebarBgBrush" Color="{StaticResource SidebarBg}" />
+        <SolidColorBrush x:Key="AccentBrush" Color="{StaticResource Accent}" />
+        <SolidColorBrush x:Key="AccentSoftBrush" Color="{StaticResource AccentSoft}" />
+        <SolidColorBrush x:Key="ContentBgBrush" Color="{StaticResource ContentBg}" />
+        <SolidColorBrush x:Key="CardBgBrush" Color="{StaticResource CardBg}" />
+        <SolidColorBrush x:Key="TextMainBrush" Color="{StaticResource TextMain}" />
+        <SolidColorBrush x:Key="TextMutedBrush" Color="{StaticResource TextMuted}" />
+        <SolidColorBrush x:Key="TextSubBrush" Color="{StaticResource TextSub}" />
+        <SolidColorBrush x:Key="BorderBrushKey" Color="{StaticResource BorderColor}" />
+        <SolidColorBrush x:Key="SuccessBrush" Color="{StaticResource Success}" />
+        <SolidColorBrush x:Key="WarningBrush" Color="{StaticResource Warning}" />
+        <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource Danger}" />
+        <SolidColorBrush x:Key="WhiteBrush" Color="White" />
+        <SolidColorBrush x:Key="HeroDarkBrush" Color="{StaticResource HeroDark}" />
+        <SolidColorBrush x:Key="HeroDark2Brush" Color="{StaticResource HeroDark2}" />
+    </Styles.Resources>
+
+    <!-- ========== Card Style ========== -->
+    <Style Selector="Border.card">
+        <Setter Property="Background" Value="{StaticResource CardBgBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrushKey}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="14" />
+        <Setter Property="Padding" Value="22" />
+    </Style>
+
+    <!-- ========== Panel Style ========== -->
+    <Style Selector="Border.panel">
+        <Setter Property="Background" Value="{StaticResource CardBgBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrushKey}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="14" />
+        <Setter Property="Padding" Value="18" />
+    </Style>
+
+    <!-- ========== Primary Button Style ========== -->
+    <Style Selector="Button.btn-primary">
+        <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="20,10" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <!-- ========== Danger Button Style（需重登/警示操作） ========== -->
+    <Style Selector="Button.btn-danger">
+        <Setter Property="Background" Value="#EF4444" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="16,9" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <!-- ========== Default Button Style ========== -->
+    <Style Selector="Button.btn">
+        <Setter Property="Background" Value="{StaticResource CardBgBrush}" />
+        <Setter Property="Foreground" Value="{StaticResource TextMainBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrushKey}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="16,9" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <!-- ========== Ghost Button Style ========== -->
+    <Style Selector="Button.btn-ghost">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="10,6" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <!-- ========== Badge Styles ========== -->
+    <Style Selector="Border.badge-ok">
+        <Setter Property="Background" Value="#1A10B981" />
+        <Setter Property="BorderBrush" Value="{StaticResource SuccessBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="999" />
+        <Setter Property="Padding" Value="10,3" />
+    </Style>
+    <Style Selector="Border.badge-warn">
+        <Setter Property="Background" Value="#1AF59E0B" />
+        <Setter Property="BorderBrush" Value="{StaticResource WarningBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="999" />
+        <Setter Property="Padding" Value="10,3" />
+    </Style>
+    <Style Selector="Border.badge-info">
+        <Setter Property="Background" Value="#1A3B82F6" />
+        <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="999" />
+        <Setter Property="Padding" Value="10,3" />
+    </Style>
+    <Style Selector="Border.badge-danger">
+        <Setter Property="Background" Value="#1AEF4444" />
+        <Setter Property="BorderBrush" Value="{StaticResource DangerBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="999" />
+        <Setter Property="Padding" Value="10,3" />
+    </Style>
+
+    <!-- ========== Navigation Item ========== -->
+    <Style Selector="Button.nav-item">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{StaticResource TextSubBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="14,11" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+        <Setter Property="FontWeight" Value="Normal" />
+    </Style>
+    <Style Selector="Button.nav-item:pointerover /template/ ContentPresenter">
+        <Setter Property="Background" Value="#22FFFFFF" />
+        <Setter Property="TextElement.Foreground" Value="White" />
+    </Style>
+    <Style Selector="Button.nav-item-active">
+        <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="14,11" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Left" />
+    </Style>
+
+    <!-- ========== Page Title ========== -->
+    <Style Selector="TextBlock.page-title">
+        <Setter Property="FontSize" Value="22" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{StaticResource TextMainBrush}" />
+    </Style>
+    <Style Selector="TextBlock.page-subtitle">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+    </Style>
+    <Style Selector="TextBlock.card-title">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+    </Style>
+    <Style Selector="TextBlock.card-value">
+        <Setter Property="FontSize" Value="26" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{StaticResource TextMainBrush}" />
+    </Style>
+
+    <!-- ========== Code Box ========== -->
+    <Style Selector="Border.code-box">
+        <Setter Property="Background" Value="#FF0F172A" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="14,12" />
+    </Style>
+
+    <!-- ========== Default Window Font ========== -->
+    <Style Selector="Window">
+        <Setter Property="FontFamily" Value="Inter,Microsoft YaHei UI,Segoe UI" />
+    </Style>
+
+</Styles>

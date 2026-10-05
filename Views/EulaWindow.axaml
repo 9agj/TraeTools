@@ -1,0 +1,86 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="620" d:DesignHeight="600"
+        x:Class="TraeTools.Views.EulaWindow"
+        Title="TRAETOOLS 最终用户许可协议"
+        Width="620" Height="600"
+        MinWidth="560" MinHeight="520"
+        Background="White"
+        FontFamily="Microsoft YaHei UI,Segoe UI">
+
+    <Grid RowDefinitions="Auto,*,Auto" Background="White">
+
+        <!-- 标题区 -->
+        <Border Grid.Row="0" Background="#FFF9FAFB" BorderBrush="#FFE2E8F0" BorderThickness="0,0,0,1" Padding="16,14">
+            <TextBlock Text="TRAETOOLS 最终用户许可协议" FontSize="15" FontWeight="Bold" Foreground="#FF0F172A" />
+        </Border>
+
+        <!-- 协议正文（可滚动） -->
+        <ScrollViewer Grid.Row="1" Background="#FFFAFAFA">
+            <TextBlock Margin="16,12" FontSize="12.5" Foreground="#FF0F172A" LineHeight="22" TextWrapping="Wrap"
+                       xml:space="preserve" FontFamily="Microsoft YaHei UI,Segoe UI">
+TRAETOOLS 最终用户许可协议（EULA）
+
+欢迎使用本软件。在使用本软件前，请仔细阅读以下条款。
+点击「同意并继续」即表示您接受本协议全部内容；如不同意，请立即关闭并删除本软件。
+
+1. 软件性质
+   本软件为作者个人技术学习成果，以开源形式（GPL-3.0）发布，按"现状"提供，
+   不包含任何形式的明示或默示担保。本软件由「TRAE 每日签到助手」与
+   「TRAE 多账号冷切换助手」整合而来，本协议同时适用于两项功能。
+
+2. 账号归属限制（使用前提）
+   您只能将本软件用于管理您本人合法拥有并有权使用的 Trae 账号。
+   签到与冷切换均仅限本人账号场景，您不得使用本软件从事批量注册、账号交易、
+   积分倒卖、共享账号租赁、工作室多开、破坏平台正常运营或任何违反
+   中华人民共和国法律法规及 Trae 平台服务条款的行为。
+
+3. 数据安全责任
+   本软件会在您的本地设备上存储登录凭证（Token / 会话 Cookie）以及
+   账号登录态备份（vault 目录，等同账号凭证）。您有责任确保这些文件
+   不被上传至公共网络、云盘或分享给任何第三方。
+   因您未妥善保管本地数据导致的账号被盗、信息泄露或其他损失，作者不承担责任。
+
+4. 切换与登录态说明
+   账号冷切换依赖 vault 中保存的登录态字节。切换仅在本机完成，
+   不涉及对 Trae 客户端程序代码的任何修改、注入或破解。
+   请您务必保管好 vault 目录，不要将其置于公共云盘或分享。
+
+5. 平台关系声明
+   本软件与 Trae 及其运营方无任何关联。
+   如官方推出同类功能或要求停止使用，您应立即停用本软件。
+
+6. 禁止逆向与滥用
+   您不得对本软件进行反编译、破解或二次开发后用于违反平台规则的目的。
+   您不得移除、修改或绕过本软件中的任何使用限制或安全提示。
+
+7. 责任免除
+   在法律允许的最大范围内，作者不对因使用或无法使用本软件而产生的任何
+   直接、间接、附带或惩罚性损害承担责任，包括但不限于账号限制、积分调整、
+   数据丢失、登录态失效等。
+
+8. 协议更新
+   作者保留随时修改本协议的权利，修改后的协议将在软件更新或仓库中公布。
+            </TextBlock>
+        </ScrollViewer>
+
+        <!-- 底部：勾选 + 按钮 -->
+        <Border Grid.Row="2" Background="#FFF9FAFB" BorderBrush="#FFE2E8F0" BorderThickness="0,1,0,0" Padding="16,12">
+            <StackPanel Spacing="12">
+                <CheckBox x:Name="AgreeCheck" Content="我已阅读并同意上述协议，且确认本软件仅用于管理本人拥有的账号"
+                          FontSize="12" Foreground="#FF0F172A" HorizontalAlignment="Left" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+                    <Button x:Name="DeclineButton" Content="不同意并退出" MinWidth="130" Height="36"
+                            Padding="12,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Click="OnDeclineClick" />
+                    <Button x:Name="AgreeButton" Content="同意并继续" MinWidth="130" Height="36"
+                            Padding="12,0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                            IsEnabled="False" Classes="btn-primary" Click="OnAgreeClick" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
+
+

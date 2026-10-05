@@ -1,0 +1,53 @@
+﻿<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="TraeTools.Views.LoginWindow"
+        Title="登录 TRAE 账号" Width="540" Height="500"
+        WindowStartupLocation="CenterOwner"
+        Background="White"
+        FontFamily="Microsoft YaHei UI,Segoe UI">
+    <Grid RowDefinitions="Auto,*,Auto" Background="White">
+        <Border Grid.Row="0" Background="#FFF9FAFB" BorderBrush="#FFE2E8F0" BorderThickness="0,0,0,1" Padding="16,14">
+            <TextBlock Text="登录 TRAE 账号" FontSize="15" FontWeight="Bold" Foreground="#FF0F172A" />
+        </Border>
+
+        <Border Grid.Row="1" Padding="16,14"><StackPanel Spacing="12">
+            <!-- 内嵌浏览器自动登录（首选） -->
+            <TextBlock TextWrapping="Wrap" FontSize="12.5" Foreground="#FF0F172A" LineHeight="20">
+推荐：点击下方「自动登录」将弹出内嵌浏览器窗口，登录成功后自动读取凭证，无需手动复制。
+            </TextBlock>
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <Button Content="自动登录（内嵌浏览器）" Click="OnAutoLoginClick" Classes="btn-primary"
+                        HorizontalAlignment="Left" MinWidth="190" Height="40" Padding="16,0"
+                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                <TextBlock x:Name="AutoStatus" FontSize="11" Foreground="#FF92400E" VerticalAlignment="Center" />
+            </StackPanel>
+
+            <Border Height="1" Background="#FFE2E8F0" Margin="0,6" />
+
+            <!-- 手动方案（备选） -->
+            <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="#FF64748B" LineHeight="19">
+备选：手动打开浏览器登录后复制 Cloud-IDE-Token 粘贴保存。
+            </TextBlock>
+            <Button Content="打开浏览器登录" Click="OnOpenBrowserClick" Classes="btn"
+                    HorizontalAlignment="Left" MinWidth="160" Height="36" Padding="14,0"
+                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+
+            <TextBlock Text="Cloud-IDE-Token" FontSize="11" Foreground="#FF94A3B8" />
+            <TextBox x:Name="TokenBox" Height="110" AcceptsReturn="True"
+                     PlaceholderText="粘贴 Cloud-IDE-Token…" FontFamily="Consolas" FontSize="11"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto" />
+
+            <TextBlock x:Name="StatusText" FontSize="12" Foreground="#FF92400E" TextWrapping="Wrap" />
+        </StackPanel></Border>
+
+        <Border Grid.Row="2" Background="#FFF9FAFB" BorderBrush="#FFE2E8F0" BorderThickness="0,1,0,0" Padding="16,12">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+                <Button Content="取消" MinWidth="100" Height="36" Padding="12,0"
+                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Click="OnCancelClick" />
+                <Button Content="保存" MinWidth="100" Height="36" Padding="12,0" Classes="btn-primary"
+                        HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Click="OnSaveClick" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
+

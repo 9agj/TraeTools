@@ -1,0 +1,87 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # 拉取完整历史与所有 tag，供生成"上一版本→本版本"更新差异
+          fetch-tags: true
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      # 发布单文件自包含 exe：应用内更新器（UpdaterService）会下载名为 TraeTools.exe 的资产，
+      # 直接覆盖本地 exe 后重启，因此必须产出可独立运行的单文件程序
+      - name: Publish (self-contained single-file win-x64)
+        run: dotnet publish TraeTools.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+
+      - name: Zip distribution
+        shell: powershell
+        run: |
+          Compress-Archive -Path publish\* -DestinationPath TraeTools-win-x64.zip -Force
+          Get-ChildItem -Path publish, TraeTools-win-x64.zip | Select-Object Name, Length
+
+      # 自动生成更新摘要：取「版本号不大于当前版本」的最近一个 v* tag，
+      # 汇总其到本版本之间的全部提交（跳过 merge 提交）。
+      # 注意：仓库保留着重构前的历史 tag（如 v1.5.2.1），必须排除版本号大于当前的，否则会选错上一版本。
+      - name: Generate release notes
+        shell: bash
+        run: |
+          set -e
+          CUR="${GITHUB_REF_NAME#v}"
+          PREV=""
+          for t in $(git tag --list 'v*' --sort=-version:refname); do
+            v="${t#v}"
+            [ "$v" = "$CUR" ] && continue
+            # 四段式版本比较（v1.0.2.2 / v1.0.3）
+            gt=0
+            IFS=. read -ra A <<< "$v"; IFS=. read -ra B <<< "$CUR"
+            for i in 0 1 2 3; do
+              x=${A[$i]:-0}; y=${B[$i]:-0}
+              if (( x > y )); then gt=1; break; fi
+              if (( x < y )); then break; fi
+            done
+            [ "$gt" = "1" ] && continue   # 大于当前版本（历史遗留超前 tag）跳过
+            PREV="$t"; break
+          done
+          {
+            echo "TraeTools ${GITHUB_REF_NAME}"
+            echo ""
+            echo "- 单文件自包含 Windows x64 程序（无需额外安装 .NET 运行时）"
+            echo "- 应用内「检查更新」会下载本 Release 的 \`TraeTools.exe\` 自动替换升级"
+            echo ""
+            if [ -n "${PREV}" ]; then
+              echo "## 更新差异（${PREV} → ${GITHUB_REF_NAME}）"
+              echo ""
+              git log --oneline --no-merges "${PREV}..HEAD" || true
+              echo ""
+              echo "> 由提交记录自动生成，完整变更请查看 Commits"
+            else
+              echo "（未找到上一版本 tag，此为首个版本）"
+            fi
+          } > release_notes.md
+          cat release_notes.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "TraeTools ${{ github.ref_name }}"
+          body_path: release_notes.md
+          files: |
+            publish/TraeTools.exe
+            TraeTools-win-x64.zip
+          generate_release_notes: false

@@ -1,0 +1,128 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:TraeTools.ViewModels"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+             x:Class="TraeTools.Views.CloudView"
+             x:DataType="vm:CloudViewModel">
+
+    <Design.DataContext>
+        <vm:CloudViewModel />
+    </Design.DataContext>
+
+    <ScrollViewer Background="Transparent" HorizontalScrollBarVisibility="Disabled">
+        <StackPanel Spacing="14" Margin="0,0,14,0">
+
+            <!-- ===== Header ===== -->
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Text="云端签到" Classes="page-title" />
+                    <TextBlock Text="GitHub Actions 自动签到 · 永不掉线" Classes="page-subtitle" />
+                </StackPanel>
+                <Button Grid.Column="1" Classes="btn-primary" Content="{Binding ActionButtonText}" Command="{Binding OneClickDeployCommand}" />
+            </Grid>
+
+            <!-- ===== 授权状态区 ===== -->
+            <Border Classes="card" Margin="0,10,0,0">
+                <StackPanel Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0" Text="GitHub 授权" Classes="card-title" VerticalAlignment="Center" />
+                        <Button Grid.Column="1" Classes="btn" Content="粘贴 Token(PAT)" Command="{Binding UsePatCommand}"
+                                Padding="12,6" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                    </Grid>
+                    <TextBlock Text="{Binding StateText}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextMainBrush}" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding DeviceCodeText}" FontSize="12" Foreground="{StaticResource AccentBrush}" FontFamily="Consolas" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <!-- ===== 部署流程（纯状态展示，非可点操作卡） ===== -->
+            <Border Classes="card" Margin="0,10,0,0">
+                <StackPanel Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0" Text="部署流程" Classes="card-title" />
+                        <TextBlock Grid.Column="1" Text="一键部署自动完成 · 仅状态展示" FontSize="11" Foreground="{StaticResource TextSubBrush}" />
+                    </Grid>
+                    <ItemsControl ItemsSource="{Binding Steps}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="3" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" Margin="0,4">
+                                    <Border Width="30" Height="30" CornerRadius="15"
+                                            Background="{Binding StatusBgBrush}" BorderBrush="{Binding StatusFgBrush}" BorderThickness="1">
+                                        <TextBlock Text="{Binding Index}" FontSize="13" FontWeight="Bold" Foreground="{Binding StatusFgBrush}"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                    <StackPanel Spacing="2" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Title}" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                        <TextBlock Text="{Binding StatusText}" FontSize="10" Foreground="{Binding StatusFgBrush}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Text="点上方主按钮「一键部署到云端」即自动完成全部步骤；本区只反映当前进度。" FontSize="11" Foreground="{StaticResource TextMutedBrush}" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <!-- ===== Deploy Status ===== -->
+            <Border Classes="card" Margin="0,10,0,0">
+                <StackPanel Spacing="12">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0" Text="部署状态" Classes="card-title" />
+                        <Button Grid.Column="1" Classes="btn-ghost" Content="打开 Actions" Command="{Binding OpenActionsCommand}" />
+                    </Grid>
+                    <Grid ColumnDefinitions="*,*,*,*" RowDefinitions="Auto,Auto">
+                        <StackPanel Grid.Row="0" Grid.Column="0" Spacing="4">
+                            <TextBlock Text="GitHub 用户" FontSize="11" Foreground="{StaticResource TextSubBrush}" />
+                            <TextBlock Text="{Binding GitHubUser}" FontSize="13" FontWeight="SemiBold" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="0" Grid.Column="1" Spacing="4">
+                            <TextBlock Text="Fork 仓库" FontSize="11" Foreground="{StaticResource TextSubBrush}" />
+                            <TextBlock Text="{Binding ForkRepo}" FontSize="13" FontWeight="SemiBold" FontFamily="Consolas" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="0" Grid.Column="2" Spacing="4">
+                            <TextBlock Text="cron 表达式" FontSize="11" Foreground="{StaticResource TextSubBrush}" />
+                            <TextBlock Text="{Binding CronExpression}" FontSize="13" FontWeight="SemiBold" FontFamily="Consolas" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="0" Grid.Column="3" Spacing="4">
+                            <TextBlock Text="凭证有效期" FontSize="11" Foreground="{StaticResource TextSubBrush}" />
+                            <TextBlock Text="{Binding CredentialExpiry}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}" />
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Grid.Column="0" Spacing="4" Margin="0,8,0,0">
+                            <TextBlock Text="上次运行" FontSize="11" Foreground="{StaticResource TextSubBrush}" />
+                            <TextBlock Text="{Binding LastRun}" FontSize="13" Foreground="{StaticResource SuccessBrush}" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Border Background="#1AF59E0B" BorderBrush="{StaticResource WarningBrush}" BorderThickness="1" CornerRadius="10" Padding="14,10" Margin="0,4,0,0">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <TextBlock Text="⚠" FontSize="16" Foreground="{StaticResource WarningBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding WarningText}" FontSize="12" Foreground="{StaticResource WarningBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- ===== Deploy Log（底部部署操作日志，固定可观高度，内部自带滚动） ===== -->
+            <Border Classes="card" Margin="0,10,0,0">
+                <StackPanel Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0" Text="部署日志" Classes="card-title" />
+                        <TextBlock Grid.Column="1" Text="操作明细" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
+                    </Grid>
+                    <Border Classes="code-box" MinHeight="140" MaxHeight="260">
+                        <ScrollViewer>
+                            <TextBlock Text="{Binding DeployLog}" Foreground="#22D3EE" FontSize="11" FontFamily="Consolas" TextWrapping="Wrap" />
+                        </ScrollViewer>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

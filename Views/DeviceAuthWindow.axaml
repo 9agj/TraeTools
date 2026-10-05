@@ -1,0 +1,33 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="TraeTools.Views.DeviceAuthWindow"
+        Title="GitHub 授权" Width="500"
+        SizeToContent="Height" WindowStartupLocation="CenterOwner"
+        Background="White"
+        FontFamily="Microsoft YaHei UI,Segoe UI">
+    <Border Background="White" Padding="22">
+        <StackPanel Spacing="14">
+            <TextBlock Text="在浏览器中完成 GitHub 授权" FontSize="15" FontWeight="Bold" Foreground="#FF0F172A" />
+            <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="#FF64748B"
+                       Text="请在 GitHub 授权页面输入下方授权码完成授权，以授予本工具 fork 仓库与部署 GitHub Actions 的权限。" />
+
+            <Border BorderBrush="#FFE2E8F0" BorderThickness="1" CornerRadius="10" Padding="16" Background="#FFF9FAFB">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="授权码（已复制到剪贴板）" FontSize="11" Foreground="#FF94A3B8" HorizontalAlignment="Center" />
+                    <TextBlock x:Name="CodeText" FontSize="30" FontWeight="Bold" FontFamily="Consolas"
+                               Foreground="#FF2563EB" HorizontalAlignment="Center" />
+                    <TextBlock x:Name="UriText" FontSize="11" Foreground="#FF3B82F6" HorizontalAlignment="Center"
+                               TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+            </Border>
+
+            <TextBlock x:Name="StatusText" FontSize="12" Foreground="#FFF59E0B" TextWrapping="Wrap" />
+
+            <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+                <Button x:Name="OpenPageButton" Content="打开授权页" MinWidth="100" Height="36" Padding="12,0" Click="OnOpenPageClick" />
+                <Button x:Name="WaitButton" Content="等待授权" MinWidth="100" Height="36" Padding="12,0" Click="OnWaitClick" />
+                <Button x:Name="CancelButton" Content="取消" MinWidth="100" Height="36" Padding="12,0" Classes="btn-primary" Click="OnCancelClick" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>
